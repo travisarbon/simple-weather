@@ -1,0 +1,171 @@
+<head>
+    <title>Local Weather</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+
+            var userLatitude;
+            var userLongitude;
+            var userGeo;
+            var storedJson;
+            var userLocation;
+            var userConditions;
+            var userTempF;
+            var userTempC;
+            var userIconUrl;
+            var tempSwitch = 0;
+            var tempColors = ["#42b9be","#41be9e","#44be62","#68be4d","#aebe47","#beaa43","#be8e43","#be6442","#be3a3f"];
+            var colorPicker;
+
+            if (navigator.geolocation) {
+
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    userLatitude = position.coords.latitude;
+                    userLongitude = position.coords.longitude;
+                    userGeo = userLatitude + "," + userLongitude;
+                    console.log("Latitude", userLatitude, "Longitude", userLongitude, "Combined", userGeo);
+
+            $.ajax({
+                type: 'Get',
+                url : "https://api.wunderground.com/api/87a44d8282be4ec2/geolookup/conditions/q/" + userGeo + ".json",
+                dataType : "jsonp",
+                success : function(parsed_json) {
+                    storedJson = parsed_json;
+                    console.log(storedJson);
+                    userLocation = storedJson['current_observation']['display_location']['full'];
+                    userTempF = storedJson['current_observation']['temp_f'];
+                    userTempC = storedJson['current_observation']['temp_c'];
+                    userConditions = storedJson['current_observation']['weather'];
+                    userIconUrl = storedJson['current_observation']['icon_url'];
+                    console.log("Location", userLocation, "Conditions", userConditions, "Temp F", userTempF, "Temp C", userTempC, "Icon URL", userIconUrl);
+                    $("#location-area").html(userLocation);
+                    $("#conditions-area").html(userConditions);
+                    $("#icon-area").attr("src", userIconUrl);
+                    $("#temp-area").html(userTempF + " F");
+                    $("#temp-button-text").html("Change to C");
+                    if(userTempC <= 0){
+                        colorPicker = tempColors[0];
+                    } else if((userTempC >= 0) && (userTempC < 4)) {
+                        colorPicker = tempColors[1];
+                    } else if((userTempC >= 4) && (userTempC < 10)) {
+                        colorPicker = tempColors[2];
+                    } else if((userTempC >= 10) && (userTempC < 16)) {
+                        colorPicker = tempColors[3];
+                    } else if((userTempC >= 16) && (userTempC < 21)) {
+                        colorPicker = tempColors[4];
+                    } else if((userTempC >= 21) && (userTempC < 27)) {
+                        colorPicker = tempColors[5];
+                    } else if((userTempC >= 27) && (userTempC < 32)) {
+                        colorPicker = tempColors[6];
+                    } else if((userTempC >= 32) && (userTempC < 38)) {
+                        colorPicker = tempColors[7];
+                    } else if(userTempC >= 38) {
+                        colorPicker = tempColors[8];
+                    }
+                    console.log(colorPicker);
+                    $('#main').css('background-color', colorPicker);
+                    $('#main').css('color', colorPicker);
+                }
+            });
+
+
+
+                });
+            }
+
+            $("#temp-button").on('click', function(){
+                if(tempSwitch === 0){
+                    $('#temp-area').html(userTempC + " C");
+                    $("#temp-button-text").html("Change to F");
+                    tempSwitch = 1;
+                } else {
+                    $('#temp-area').html(userTempF + " F");
+                    $("#temp-button-text").html("Change to C");
+                    tempSwitch = 0;}
+            });
+
+        });
+    </script>
+    <style>
+
+        body {
+            background-color: #fff5f5;
+            color: #fff5f5;
+            font-size: 24px;
+
+
+        }
+
+        .main-bar {
+            color: inherit;
+            background-color: #fff5f5;
+            margin-top: 150px;
+            margin-bottom: 150px;
+            margin-right: 25px;
+            margin-left: 25px;
+            padding-top: 15px;
+            text-align: center;
+            vertical-align: middle;
+            border-radius: 25px;
+
+        }
+
+        .btn {
+            background-color: inherit;
+        }
+
+        p {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        #icon-area {
+            padding-top: 0px;
+        }
+
+        @media screen and (max-width: 600px) {
+
+            .main-bar {
+                margin: 5px;
+                padding: 10px;
+            }
+
+
+        }
+    </style>
+</head>
+
+<body id = "main">
+<div class = "container-fluid">
+    <!-- This is where all the buttons, information and icons will be displayed -->
+    <div class = "row main-bar">
+        <div class = "col-md-4" id = "location-display">
+            <p id = "location-area">
+            </p>
+        </div>
+        <div class = "col-md-2" id = "conditions-display">
+            <p id = "conditions-area">
+            </p>
+        </div>
+        <div class = "col-md-2" id = "icon-display">
+            <img id = "icon-area" src = "">
+        </div>
+        <div class = "col-md-2" id = "temp-display">
+            <p id = "temp-area">
+            </p>
+        </div>
+        <div class = "col-md-2" id = "temp-button">
+            <button class = "btn btn-block">
+                <p id = "temp-button-text">
+                </p>
+            </button>
+        </div>
+    </div>
+</div>
+</body>
